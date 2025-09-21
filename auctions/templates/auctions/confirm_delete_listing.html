@@ -1,0 +1,12 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+  <h2>Delete Listing</h2>
+  <p>Are you sure you want to delete the listing <strong>{{ listing.name }}</strong>?</p>
+
+  <form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger">Yes, delete</button>
+    <a href="{% url 'listing_detail' listing.id %}" class="btn btn-secondary">Cancel</a>
+  </form>
+{% endblock %}

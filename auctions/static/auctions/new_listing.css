@@ -1,0 +1,60 @@
+/* Body background */
+body {
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #1e3c72, #2a5298);
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Centered container */
+#new-listing-page {
+    background: #ffffff;
+    padding: 2rem;
+    margin-top: 2rem;
+    border-radius: 8px;
+    box-shadow: 0px 4px 12px rgba(0,0,0,0.2);
+    width: 100%;
+    max-width: 420px;
+    text-align: center;
+}
+
+/* Title */
+#new-listing-page h2 {
+    margin-bottom: 1.2rem;
+    color: #2a5298;
+    font-weight: 600;
+}
+
+/* Input spacing */
+#new-listing-page .form-group {
+    margin-bottom: 1rem;
+}
+
+/* Inputs */
+#new-listing-page .form-control {
+    width: 100%;
+    padding: 0.75rem;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-size: 1rem;
+}
+
+/* Button */
+#new-listing-page .btn-submit {
+    width: 100%;
+    padding: 0.75rem;
+    border: none;
+    border-radius: 6px;
+    background: #2575fc;
+    color: #fff;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+#new-listing-page .btn-submit:hover {
+    background: #1e5ed6;
+}

@@ -1,0 +1,144 @@
+{% extends "auctions/layout.html" %}
+{% block body %}
+  <div class="row">
+    <div class="col-md-6">
+      {% if listing.image_url %}
+        <img src="{{ listing.image_url }}" alt="{{ listing.name }}" class="img-fluid mb-3">
+      {% endif %}
+      <h2>{{ listing.name }}</h2>
+      {% if listing.category %}
+        <p><span class="badge badge-info">{{ listing.category.name }}</span></p>
+      {% endif %}
+      <p>{{ listing.description }}</p>
+      <p>Starting Price: ${{ listing.starting_price }}</p>
+      <p>Current Price: <strong>${{ listing.current_price }}</strong></p>
+      <p>Bid Increment (Quick Bid): ${{ listing.bid_increase }}</p>
+
+      {% if listing.end_time %}
+        <p>Auction ends at: {{ listing.end_time|date:"M d, Y H:i" }}</p>
+        <!-- Optional debug lines to verify times -->
+        <small class="text-muted d-block">Server now: {{ now|date:"c" }}</small>
+        <small class="text-muted d-block">Saved end: {{ listing.end_time|date:"c" }}</small>
+
+        <div id="countdown" class="mb-2"></div>
+        <script>
+          (function() {
+            var endTime = new Date("{{ listing.end_time|date:'c' }}").getTime();
+            var el = document.getElementById("countdown");
+            function tick() {
+              var now = new Date().getTime();
+              var d = endTime - now;
+              if (d <= 0) { el.innerHTML = "<strong>Auction Ended</strong>"; return; }
+              var days = Math.floor(d / (1000*60*60*24));
+              var hours = Math.floor((d % (1000*60*60*24)) / (1000*60*60));
+              var mins  = Math.floor((d % (1000*60*60)) / (1000*60));
+              var secs  = Math.floor((d % (1000*60)) / 1000);
+              var parts = [];
+              if (days>0) parts.push(days + "d");
+              parts.push(hours + "h", mins + "m", secs + "s");
+              el.textContent = "Time left: " + parts.join(" ");
+            }
+            tick();
+            setInterval(tick, 1000);
+          })();
+        </script>
+      {% else %}
+        <p><em>No end time set.</em></p>
+      {% endif %}
+
+      {% if not listing.is_active %}
+        <p class="mt-2"><strong>Auction ended.</strong></p>
+        {% if listing.winner %}
+          <p>Winner: <strong>{{ listing.winner.username }}</strong> with ${{ listing.highest_bid.amount }}</p>
+          {% if user.is_authenticated and user == listing.winner %}
+            <div class="alert alert-success">You won this auction!</div>
+          {% endif %}
+        {% else %}
+          <p>No bids were placed.</p>
+        {% endif %}
+      {% endif %}
+
+      {% if listing.is_active %}
+        {% if user.is_authenticated %}
+          <form method="post" class="mb-2">
+            {% csrf_token %}
+            <div class="form-inline">
+              <input type="number" step="0.01" name="bid_amount" class="form-control mr-2" placeholder="Enter bid" required>
+              <button type="submit" name="place_bid" class="btn btn-primary">Place Bid</button>
+            </div>
+          </form>
+
+          <form method="post" class="mb-3 d-inline">
+            {% csrf_token %}
+            <button type="submit" name="increment_bid" class="btn btn-info">Quick Bid +{{ listing.bid_increase }}</button>
+          </form>
+        {% else %}
+          <p><a href="{% url 'login' %}">Log in</a> to place a bid.</p>
+        {% endif %}
+      {% endif %}
+
+      {% if user.is_authenticated %}
+        <form method="post" action="{% url 'toggle_watchlist' listing.id %}" class="mb-3">
+          {% csrf_token %}
+          {% if user in listing.watchers.all %}
+            <button type="submit" class="btn btn-warning">Remove from Watchlist</button>
+          {% else %}
+            <button type="submit" class="btn btn-secondary">Add to Watchlist</button>
+          {% endif %}
+        </form>
+      {% endif %}
+
+      {% if user.is_authenticated and user == listing.owner and listing.is_active %}
+        <form method="post" action="{% url 'close_listing' listing.id %}" class="mb-4">
+          {% csrf_token %}
+          <button class="btn btn-danger">Close Auction</button>
+        </form>
+      {% endif %}
+    </div>
+
+    <div class="col-md-6">
+      <h4>Bid History</h4>
+      {% if bids %}
+        <table class="table table-sm table-bordered">
+          <thead><tr><th>User</th><th>Amount</th><th>Time</th></tr></thead>
+          <tbody>
+            {% for bid in bids %}
+              <tr>
+                <td>{{ bid.user.username }}</td>
+                <td>${{ bid.amount }}</td>
+                <td>{{ bid.created_at|date:"M d, Y H:i" }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <p>No bids yet.</p>
+      {% endif %}
+
+      <h4 class="mt-4">Comments</h4>
+      {% if user.is_authenticated %}
+        <form method="post" class="mb-2">
+          {% csrf_token %}
+          <textarea class="form-control" name="comment_content" rows="3" placeholder="Write your comment..."></textarea>
+          <button type="submit" class="btn btn-secondary mt-2">Post Comment</button>
+        </form>
+      {% else %}
+        <p><a href="{% url 'login' %}">Log in</a> to comment.</p>
+      {% endif %}
+
+      {% if comments %}
+        <ul class="list-group">
+          {% for c in comments %}
+            <li class="list-group-item">
+              <strong>{{ c.user.username }}</strong>
+              <small class="text-muted">{{ c.created_at|date:"M d, Y H:i" }}</small><br>
+              {{ c.content }}
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p>No comments yet.</p>
+      {% endif %}
+    </div>
+  </div>
+{% endblock %}

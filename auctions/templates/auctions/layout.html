@@ -1,0 +1,56 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>{% block title %}Auctions{% endblock %}</title>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+  <link href="{% static 'auctions/styles.css' %}" rel="stylesheet">
+</head>
+<body>
+  <div class="container py-3">
+    <h1>Auctions</h1>
+
+    <div class="mb-2">
+      {% if user.is_authenticated %}
+        Signed in as <strong>{{ user.username }}</strong>.
+      {% else %}
+        Not signed in.
+      {% endif %}
+    </div>
+
+    <ul class="nav">
+      <li class="nav-item"><a class="nav-link" href="{% url 'index' %}">Active Listings</a></li>
+      <li class="nav-item"><a class="nav-link" href="{% url 'categories' %}">Categories</a></li>
+      {% if user.is_authenticated %}
+        <li class="nav-item"><a class="nav-link" href="{% url 'new_listing' %}">New Auction</a></li>
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'watchlist' %}">
+            Watchlist
+            {% with count=user.watchlist.count %}
+              {% if count > 0 %}
+                <span class="badge badge-primary">{{ count }}</span>
+              {% endif %}
+            {% endwith %}
+          </a>
+        </li>
+        <li class="nav-item"><a class="nav-link" href="{% url 'logout' %}">Log Out</a></li>
+      {% else %}
+        <li class="nav-item"><a class="nav-link" href="{% url 'login' %}">Log In</a></li>
+        <li class="nav-item"><a class="nav-link" href="{% url 'register' %}">Register</a></li>
+      {% endif %}
+    </ul>
+
+    {% if messages %}
+      <div class="mt-2">
+        {% for message in messages %}
+          <div class="alert alert-{{ message.tags|default:'info' }} mb-2">{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    <hr>
+    {% block body %}{% endblock %}
+  </div>
+</body>
+</html>
